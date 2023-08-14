@@ -220,9 +220,9 @@ static unsigned char uno_rate[RATE_LEN + 1] =
     WIFI_11N_MCS0
 };
 
-void thr_list_add(struct thr_list_head *new_head,
-                                struct thr_list_head *prev,
-                                struct thr_list_head *next)
+void thr_list_add(struct list_head *new_head,
+                                struct list_head *prev,
+                                struct list_head *next)
 {
         next->prev = new_head;
         new_head->next = next;
@@ -609,7 +609,7 @@ static int b2b_tx_thread_function(void *param)
         printk("**** stop : when pt send pkt %d done ***", loop);
     }// thread loop
 
-    complete_and_exit(&b2b_tx_struct.b2b_thread_cmplt, 0);
+    kthread_complete_and_exit(&b2b_tx_struct.b2b_thread_cmplt, 0);
     printk("**** exit b2b_tx_thread_function ***");
     return 0;
 }
