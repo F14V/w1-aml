@@ -389,14 +389,18 @@ int drv_cfg_load_from_file(void)
     int size, len;
     int error = 0;
     char *content =  NULL;
+#ifdef set_fs
     mm_segment_t fs;
+#endif
     char conf_path[30] = "/vendor/etc/wifi/w1";
     unsigned char cfg_file[100];
 
     sprintf(cfg_file, "%s/aml_wifi_drv_cfg_%d.conf", conf_path, 0);
 
+#ifdef set_fs
     fs = get_fs();
     set_fs(KERNEL_DS);
+#endif
 
     fp = filp_open(cfg_file, O_RDONLY, 0);
 
@@ -435,10 +439,14 @@ int drv_cfg_load_from_file(void)
 
     FREE(content, "aml_drv_cfg");
     filp_close(fp, NULL);
+#ifdef set_fs
     set_fs(fs);
+#endif
 
     return 0;
 err:
+#ifdef set_fs
     set_fs(fs);
+#endif
     return 1;
 }

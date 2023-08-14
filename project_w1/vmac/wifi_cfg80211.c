@@ -5482,12 +5482,16 @@ void record_reg_value(unsigned int address, unsigned int value)
 {
     struct kstat stat;
     struct file *fp;
+#ifdef set_fs
     mm_segment_t fs;
+#endif
     int error = 0;
     char buf[512] = {0};
 
+#ifdef set_fs
     fs = get_fs();
     set_fs(KERNEL_DS);
+#endif
 
     fp = filp_open(reg_result_path, O_CREAT|O_RDWR, 0644);
 
@@ -5516,7 +5520,9 @@ void record_reg_value(unsigned int address, unsigned int value)
         ERROR_DEBUG_OUT("open file %s failed.\n", reg_result_path);
     }
 err:
+#ifdef set_fs
     set_fs(fs);
+#endif
 }
 
 int vm_cfg80211_vnd_cmd_set_para(struct wiphy *wiphy, struct wireless_dev *wdev, const void *data, int data_len)
@@ -5861,13 +5867,17 @@ int vm_cfg80211_vnd_cmd_set_para(struct wiphy *wiphy, struct wireless_dev *wdev,
         if (wnet_vif->vm_state == WIFINET_S_CONNECTED) {
             struct kstat stat;
             struct file *fp;
+#ifdef set_fs
             mm_segment_t fs;
+#endif
             int error = 0;
             char buf[512] = {0};
             unsigned int arr[8] = {0};
 
+#ifdef set_fs
             fs = get_fs();
             set_fs(KERNEL_DS);
+#endif
 
             fp = filp_open(rssi_result_path, O_CREAT|O_RDWR, 0644);
 
@@ -5902,7 +5912,9 @@ int vm_cfg80211_vnd_cmd_set_para(struct wiphy *wiphy, struct wireless_dev *wdev,
                 ERROR_DEBUG_OUT("open file %s failed.\n", rssi_result_path);
             }
 err:
+#ifdef set_fs
             set_fs(fs);
+#endif
 
         }
         break;
