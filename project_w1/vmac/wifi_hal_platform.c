@@ -13,7 +13,7 @@ namespace FW_NAME
 #include "version.h"
 #include "wifi_drv_reg_ops.h"
 #if defined (HAL_FPGA_VER)
-#include <linux/amlogic/aml_gpio_consumer.h>
+#include "aml_gpio_consumer.h"
 #include "wifi_mac_com.h"
 #include <linux/delay.h>
 #endif

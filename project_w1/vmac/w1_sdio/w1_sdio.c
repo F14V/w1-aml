@@ -1325,7 +1325,7 @@ int  aml_w1_sdio_init(void)
     if (err)
         PRINT("failed to register sdio driver: %d \n", err);
 
-        return err;
+    return err;
 }
 EXPORT_SYMBOL(aml_w1_sdio_init);
 
