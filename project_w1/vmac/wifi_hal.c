@@ -2491,7 +2491,7 @@ int hal_work_thread(void *param)
 
     PRINT("############# Exit work Thread ###############\n");
     WAKE_LOCK_DESTROY(hal_priv, WAKE_LOCK_WORK);
-    complete_and_exit(&hal_priv->work_thread_completion, 0);
+    kthread_complete_and_exit(&hal_priv->work_thread_completion, 0);
 
     return 0;
 }
@@ -2562,7 +2562,7 @@ int hal_txok_thread(void *param)
 
     printk("%s(%d)  =====> exit TXOK Thread <=====\n",__func__,__LINE__);
     WAKE_LOCK_DESTROY(hal_priv, WAKE_LOCK_TXOK);
-    complete_and_exit(&hal_priv->txok_thread_completion, 0);
+    kthread_complete_and_exit(&hal_priv->txok_thread_completion, 0);
 
     return 0;
 }
@@ -2694,7 +2694,7 @@ int hal_rx_thread(void *param)
 
     printk("%s(%d)  =====> exit RX Thread <=====\n",__func__,__LINE__);
     WAKE_LOCK_DESTROY(hal_priv, WAKE_LOCK_RX);
-    complete_and_exit(&hal_priv->rx_thread_completion, 0);
+    kthread_complete_and_exit(&hal_priv->rx_thread_completion, 0);
     return 0;
 }
 
@@ -2743,7 +2743,7 @@ int hi_irq_thread(void *param)
     }
 
     WAKE_LOCK_DESTROY(hal_priv, WAKE_LOCK_HI_IRQ_THREAD);
-    complete_and_exit(&hal_priv->hi_irq_thread_completion, 0);
+    kthread_complete_and_exit(&hal_priv->hi_irq_thread_completion, 0);
 
     return 0;
 }

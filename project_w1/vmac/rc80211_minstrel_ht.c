@@ -801,7 +801,7 @@ minstrel_ht_set_rate(struct minstrel_priv *mp, struct minstrel_ht_sta *mi,
     *  - if station is in dynamic SMPS (and streams > 1)
     *  - for fallback rates, to increase chances of getting through
     */
-    if (offset > 0 || (mi->sta->smps_mode == IEEE80211_SMPS_DYNAMIC &&
+    if (offset > 0 || (mi->sta->deflink.smps_mode == IEEE80211_SMPS_DYNAMIC &&
         group->streams > 1)) {
         ratetbl->rate[offset].count = ratetbl->rate[offset].count_rts;
         flags |= IEEE80211_TX_RC_USE_RTS_CTS;
@@ -1053,9 +1053,9 @@ minstrel_ht_update_caps(void *priv, struct ieee80211_supported_band *sband,
 	struct minstrel_priv *mp = priv;
 	struct minstrel_ht_sta_priv *msp = priv_sta;
 	struct minstrel_ht_sta *mi = &msp->ht;
-	struct ieee80211_mcs_info *mcs = &sta->ht_cap.mcs;
-	u16 sta_cap = sta->ht_cap.cap;
-	struct ieee80211_sta_vht_cap *vht_cap = &sta->vht_cap;
+	struct ieee80211_mcs_info *mcs = &sta->deflink.ht_cap.mcs;
+	u16 sta_cap = sta->deflink.ht_cap.cap;
+	struct ieee80211_sta_vht_cap *vht_cap = &sta->deflink.vht_cap;
 	int use_vht;
 	int n_supported = 0;
 	int ack_dur;
@@ -1063,7 +1063,7 @@ minstrel_ht_update_caps(void *priv, struct ieee80211_supported_band *sband,
 	int i;
 
 	/* fall back to the old minstrel for legacy stations */
-	if (!sta->ht_cap.ht_supported)
+	if (!sta->deflink.ht_cap.ht_supported)
 		goto use_legacy;
 
 	//ASSERT(ARRAY_SIZE(minstrel_mcs_groups) != MINSTREL_GROUPS_NB);
@@ -1129,13 +1129,13 @@ minstrel_ht_update_caps(void *priv, struct ieee80211_supported_band *sband,
 		}
 
 		if (gflags & IEEE80211_TX_RC_40_MHZ_WIDTH &&
-		    sta->bandwidth < IEEE80211_STA_RX_BW_40)
+		    sta->deflink.bandwidth < IEEE80211_STA_RX_BW_40)
 			continue;
 
 		nss = minstrel_mcs_groups[i].streams;
 
 		/* Mark MCS > 7 as unsupported if STA is in static SMPS mode */
-		if (sta->smps_mode == IEEE80211_SMPS_STATIC && nss > 1)
+		if (sta->deflink.smps_mode == IEEE80211_SMPS_STATIC && nss > 1)
 			continue;
 
 		/* HT rate */
@@ -1160,7 +1160,7 @@ minstrel_ht_update_caps(void *priv, struct ieee80211_supported_band *sband,
 			continue;
 
 		if (gflags & IEEE80211_TX_RC_80_MHZ_WIDTH) {
-			if (sta->bandwidth < IEEE80211_STA_RX_BW_80 ||
+			if (sta->deflink.bandwidth < IEEE80211_STA_RX_BW_80 ||
 				((gflags & IEEE80211_TX_RC_SHORT_GI) &&
 				!(vht_cap->cap & IEEE80211_VHT_CAP_SHORT_GI_80))) {
 				continue;
@@ -1174,7 +1174,7 @@ minstrel_ht_update_caps(void *priv, struct ieee80211_supported_band *sband,
 		else
 			bw = BW_20;
 
-		if (sta->bandwidth < bw) {
+		if (sta->deflink.bandwidth < bw) {
 			continue;
 		}
 
@@ -1328,7 +1328,7 @@ static void  init_sample_table(void)
 
     memset(sample_table, 0xff, sizeof(sample_table));
     for (col = 0; col < SAMPLE_COLUMNS; col++) {
-        prandom_bytes(rnd, sizeof(rnd));
+        get_random_bytes(rnd, sizeof(rnd));
         for (i = 0; i < MCS_GROUP_RATES; i++) {
             new_idx = (i + rnd[i]) % MCS_GROUP_RATES;
             while (sample_table[col][new_idx] != 0xff)

@@ -2137,7 +2137,7 @@ vm_cfg80211_update_wiphy_params(struct wiphy *wiphy)
     vm_wdev = wnet_vif->vm_wdev;
     printk("vm_wdev:0x%p, %s, %d\n", vm_wdev, __func__, __LINE__);
 
-    chandef = &vm_wdev->preset_chandef;
+    chandef = &vm_wdev->u.ap.preset_chandef;
     if (chandef->chan == NULL) {
         ERROR_DEBUG_OUT("chandef->chan NULL\n");
         return -1;
@@ -2342,8 +2342,8 @@ int softap_get_sta_num(struct wlan_net_vif *wnet_vif)
     return sta_num -1;
 }
 
-static  int vm_cfg80211_add_key(struct wiphy *wiphy, struct net_device *dev, unsigned char key_index,
-    bool pairwise, const unsigned char *mac_addr, struct key_params *params)
+static  int vm_cfg80211_add_key(struct wiphy *wiphy, struct net_device *dev, int link_id,
+    unsigned char key_index, bool pairwise, const unsigned char *mac_addr, struct key_params *params)
 {
     struct wlan_net_vif *wnet_vif = wiphy_to_adapter(wiphy);
     const struct key_params *lparams = params;
@@ -2549,7 +2549,7 @@ vm_cfg80211_set_rekey_data(struct wiphy *wiphy,
     return -1;
 }
 
-static int vm_cfg80211_del_key(struct wiphy *wiphy, struct net_device *dev,
+static int vm_cfg80211_del_key(struct wiphy *wiphy, struct net_device *dev, int link_id,
     unsigned char key_index, bool pairwise, const unsigned char *mac_addr)
 {
     struct wlan_net_vif *wnet_vif = wiphy_to_adapter(wiphy);
@@ -2610,7 +2610,7 @@ exit:
 }
 
 static int
-vm_cfg80211_get_key(struct wiphy *wiphy, struct net_device *dev,
+vm_cfg80211_get_key(struct wiphy *wiphy, struct net_device *dev, int link_id,
     unsigned char key_index, bool pairwise, const unsigned char *mac_addr,
     void *cookie,void (*callback)(void *cookie,struct key_params*))
 {
@@ -2618,15 +2618,15 @@ vm_cfg80211_get_key(struct wiphy *wiphy, struct net_device *dev,
     return 0;
 }
 
-static int vm_cfg80211_config_default_key(struct wiphy *wiphy,
-    struct net_device *dev,unsigned char key_index, bool unicast, bool multicast)
+static int vm_cfg80211_config_default_key(struct wiphy *wiphy, struct net_device *dev, int link_id,
+    unsigned char key_index, bool unicast, bool multicast)
 {
     DPRINTF(AML_DEBUG_CFG80211, "%s<%s>, index:%d, uni:%d, mul:%d\n", __func__, dev->name, key_index, unicast, multicast);
     return 0;
 }
 
-static int vm_cfg80211_set_default_mgmt_key(struct wiphy *wiphy,
-    struct net_device *dev, unsigned char key_idx)
+static int vm_cfg80211_set_default_mgmt_key(struct wiphy *wiphy, struct net_device *dev, int link_id,
+    unsigned char key_idx)
 {
     struct wlan_net_vif *wnet_vif = wiphy_to_adapter(wiphy);
 
@@ -3264,8 +3264,7 @@ legacy_k2dot11_rate_map(unsigned int kernel_rate)
     return ret ;
 }
 
-int vm_cfg80211_set_bitrate_mask(struct wiphy *wiphy,
-    struct net_device *dev,
+int vm_cfg80211_set_bitrate_mask(struct wiphy *wiphy, struct net_device *dev, unsigned int link_id,
     const unsigned char *peer,
     const struct cfg80211_bitrate_mask *mask)
 {
@@ -4092,7 +4091,7 @@ static int vm_cfg80211_change_beacon(struct wiphy *wiphy,
     return ret;
 }
 
-static int vm_cfg80211_stop_ap(struct wiphy *wiphy, struct net_device *ndev)
+static int vm_cfg80211_stop_ap(struct wiphy *wiphy, struct net_device *ndev, unsigned int link_id)
 {
     struct wlan_net_vif *wnet_vif = wiphy_to_adapter(wiphy);
     struct drv_private *drv_priv = drv_get_drv_priv();
@@ -4682,7 +4681,7 @@ static int vm_cfg80211_mgmt_tx_p2p(struct wiphy *wiphy, struct wireless_dev *wde
     p2p_pub_act = (struct wifi_mac_p2p_pub_act_frame *)(params->buf + sizeof(struct wifi_frame));
     if (wnet_vif->vm_opmode != WIFINET_M_HOSTAP && wnet_vif->vm_state == WIFINET_S_CONNECTED) {
         if (is_need_process_p2p_action((unsigned char*)params->buf)) {
-            printk("%s, Need to send action frame in the connected state, params->len=%d\n", __func__, params->len);
+            printk("%s, Need to send action frame in the connected state, params->len=%zd\n", __func__, params->len);
         } else {
             return 0;//no need to send mgmt after connected,if so, disconnect first
         }
@@ -5009,7 +5008,7 @@ vm_cfg80211_set_antenna(struct wiphy *wiphy, unsigned int tx_ant, unsigned int r
 }
 
 static int
-vm_cfg80211_get_channel(struct wiphy *wiphy, struct wireless_dev *wdev,
+vm_cfg80211_get_channel(struct wiphy *wiphy, struct wireless_dev *wdev, unsigned int link_id,
                         struct cfg80211_chan_def *chandef)
 {
     struct wlan_net_vif *wnet_vif = NULL;
@@ -5330,7 +5329,7 @@ static struct cfg80211_ops vm_cfg80211_ops =
     .set_wiphy_params = vm_cfg80211_set_wiphy_params,
     .set_tx_power = vm_cfg80211_set_tx_power,
     .get_tx_power = vm_cfg80211_get_tx_power,
-    .set_wds_peer = vm_cfg80211_set_wds_peer,
+    // .set_wds_peer = vm_cfg80211_set_wds_peer,
 
     .set_bitrate_mask = vm_cfg80211_set_bitrate_mask,
     .set_pmksa = aml_cfg80211_set_pmksa,
